@@ -47,7 +47,7 @@ module Resque
       else
         queue_names = @queues.map {|queue| queue.redis_name }
         synchronize do
-          value = @redis.blpop(*(queue_names + [{:timeout => 1}])) until value
+          value = @redis.blpop(queue_names, :timeout => 1) until value
           queue_name, payload = value
           queue = @queue_hash[queue_name]
           [queue, queue.decode(payload)]
@@ -61,7 +61,7 @@ module Resque
     # the timeout expires.
     def poll(timeout)
       queue_names = @queues.map {|queue| queue.redis_name }
-      queue_name, payload = @redis.blpop(*(queue_names + [{:timeout => timeout}]))
+      queue_name, payload = @redis.blpop(queue_names, :timeout => timeout)
       return unless payload
 
       synchronize do
