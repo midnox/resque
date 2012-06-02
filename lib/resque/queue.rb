@@ -72,7 +72,7 @@ module Resque
         end
       else
         synchronize do
-          value = @redis.blpop(@redis_name, 1) until value
+          value = @redis.blpop(@redis_name, :timeout => 1) until value
           decode value.last
         end
       end
