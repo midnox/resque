@@ -134,6 +134,7 @@ module Resque
           log "got: #{job.inspect}"
           job.worker = self
           run_hook :before_fork, job
+          ActiveRecord::Base.establish_connection rescue nil # connect to DB
           working_on job
 
           if @child = fork
@@ -142,7 +143,6 @@ module Resque
             Process.wait(@child)
           else
             procline "Processing #{job.queue} since #{Time.now.to_i}"
-            ActiveRecord::Base.establish_connection # connect to DB
             redis.client.reconnect # Don't share connection with parent
             perform(job, &block)
             exit! unless @cant_fork
